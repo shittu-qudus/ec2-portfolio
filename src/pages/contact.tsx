@@ -1,0 +1,382 @@
+import { useState } from "react";
+import Sidebar from "./sidebar";
+
+type Status = "idle" | "sending" | "success" | "error";
+
+const Contact = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("sending");
+    setErrorMessage("");
+    
+    console.log("Sending to Lambda:", { name, email, message });
+    
+    try {
+      const response = await fetch("https://68b10v18bl.execute-api.us-east-1.amazonaws.com/prod/contact", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, message }),
+      });
+      
+      console.log("Response status:", response.status);
+      const data = await response.json();
+      console.log("Response data:", data);
+      
+      if (response.ok) {
+        setStatus("success");
+        setName("");
+        setEmail("");
+        setMessage("");
+      } else {
+        throw new Error(data.error || data.details || `Server error: ${response.status}`);
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setStatus("error");
+      setErrorMessage(err.message || "Failed to send message. Please try again.");
+    }
+  };
+
+  return (
+    <>
+      <div className="sidebar-comp">
+        <Sidebar />
+      </div>
+
+      <main id="contact-comp">
+        <div className="ct-left">
+          <span className="ct-badge">Get in touch</span>
+          <h1 className="ct-heading">
+            Let&apos;s Build Something<br />
+            <span className="ct-heading-accent">Amazing</span>
+          </h1>
+          <p className="ct-sub">
+            Got an idea, a collaboration request, or just want to say hello?
+            Drop a message — I respond faster than you think.
+          </p>
+
+          <div className="ct-how">
+            <p className="ct-direct-label">Powered by AWS Lambda</p>
+            <div className="ct-steps">
+              <div className="ct-step">
+                <span className="ct-step-num">1</span>
+                <span className="ct-step-text">You fill the form</span>
+              </div>
+              <div className="ct-step-arrow">→</div>
+              <div className="ct-step">
+                <span className="ct-step-num">2</span>
+                <span className="ct-step-text">Lambda runs</span>
+              </div>
+              <div className="ct-step-arrow">→</div>
+              <div className="ct-step">
+                <span className="ct-step-num">3</span>
+                <span className="ct-step-text">Email sent via SES</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ct-direct">
+            <p className="ct-direct-label">Prefer direct contact?</p>
+            <a href="mailto:shittuqadekunle@gmail.com" className="ct-email">
+              shittuqadekunle@gmail.com
+            </a>
+          </div>
+        </div>
+
+        <div className="ct-right">
+          <form className="ct-form" onSubmit={handleSubmit}>
+            <div className="ct-field">
+              <label className="ct-label" htmlFor="name">Your Name</label>
+              <input
+                id="name"
+                type="text"
+                required
+                placeholder="John Doe"
+                className="ct-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={status === "sending" || status === "success"}
+              />
+            </div>
+            <div className="ct-field">
+              <label className="ct-label" htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                required
+                placeholder="john@example.com"
+                className="ct-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === "sending" || status === "success"}
+              />
+            </div>
+            <div className="ct-field">
+              <label className="ct-label" htmlFor="message">Your Message</label>
+              <textarea
+                id="message"
+                required
+                rows={5}
+                placeholder="Tell me about your project or idea..."
+                className="ct-input ct-textarea"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                disabled={status === "sending" || status === "success"}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={status === "sending" || status === "success"}
+              className="ct-btn"
+            >
+              {status === "sending"
+                ? "Sending..."
+                : status === "success"
+                ? "Message Sent ✓"
+                : "Send Message →"}
+            </button>
+            {status === "success" && (
+              <p className="ct-feedback ct-success">
+                🚀 Thanks! Your message is on its way.
+              </p>
+            )}
+            {status === "error" && (
+              <p className="ct-feedback ct-error">
+                ⚠️ {errorMessage || "Something went wrong. Please try again."}
+              </p>
+            )}
+            {status === "success" && (
+              <button
+                type="button"
+                className="ct-reset-btn"
+                onClick={() => setStatus("idle")}
+              >
+                Send another message
+              </button>
+            )}
+          </form>
+        </div>
+      </main>
+
+      <style>{`
+        #contact-comp {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+          gap: 4rem;
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 4rem 1.5rem 5rem;
+          min-height: 80vh;
+          box-sizing: border-box;
+        }
+        .ct-left {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 1.2rem;
+          padding-top: 0.5rem;
+        }
+        .ct-badge {
+          display: inline-block;
+          font-size: 0.72rem;
+          font-weight: 600;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          border: 1.5px solid rgba(255,255,255,0.25);
+          border-radius: 999px;
+          padding: 0.28rem 0.9rem;
+          color: rgba(255,255,255,0.55);
+          width: fit-content;
+        }
+        .ct-heading {
+          font-size: clamp(2rem, 4vw, 3rem);
+          font-weight: 800;
+          color: #fff;
+          line-height: 1.15;
+          letter-spacing: -0.02em;
+          margin: 0;
+        }
+        .ct-heading-accent { color: rgba(255,255,255,0.45); }
+        .ct-sub {
+          font-size: 0.97rem;
+          line-height: 1.75;
+          color: rgba(255,255,255,0.55);
+          max-width: 340px;
+        }
+        .ct-how {
+          margin-top: 0.5rem;
+          padding: 1rem;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.03);
+        }
+        .ct-steps {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-top: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .ct-step {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+        .ct-step-num {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.15);
+          color: #fff;
+          font-size: 0.7rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .ct-step-text { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+        .ct-step-arrow { font-size: 0.75rem; color: rgba(255,255,255,0.25); }
+        .ct-direct {
+          margin-top: 1rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .ct-direct-label {
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.4);
+          margin-bottom: 0.4rem;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+        .ct-email {
+          font-size: 0.95rem;
+          color: #fff;
+          text-decoration: none;
+          border-bottom: 1px solid rgba(255,255,255,0.3);
+          padding-bottom: 1px;
+          transition: border-color 0.2s;
+        }
+        .ct-email:hover { border-color: #fff; }
+        .ct-right {
+          flex: 1;
+          width: 100%;
+          min-width: 0;
+        }
+        .ct-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          width: 100%;
+        }
+        .ct-field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+          width: 100%;
+        }
+        .ct-label {
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.5);
+        }
+        .ct-input {
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 10px;
+          padding: 0.75rem 1rem;
+          font-size: 0.95rem;
+          color: #fff;
+          outline: none;
+          transition: border-color 0.2s, background 0.2s;
+          width: 100%;
+          box-sizing: border-box;
+          font-family: inherit;
+          display: block;
+        }
+        .ct-input::placeholder { color: rgba(255,255,255,0.25); }
+        .ct-input:focus {
+          border-color: rgba(255,255,255,0.45);
+          background: rgba(255,255,255,0.08);
+        }
+        .ct-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ct-textarea { resize: vertical; min-height: 130px; }
+        .ct-btn {
+          margin-top: 0.25rem;
+          padding: 0.85rem 1.5rem;
+          background: #fff;
+          color: #000;
+          font-size: 0.95rem;
+          font-weight: 700;
+          border: none;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: opacity 0.2s, transform 0.15s;
+          width: 100%;
+          box-sizing: border-box;
+          display: block;
+          font-family: inherit;
+        }
+        .ct-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+        .ct-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ct-reset-btn {
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.2);
+          color: rgba(255,255,255,0.6);
+          font-size: 0.85rem;
+          padding: 0.6rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          width: 100%;
+          font-family: inherit;
+          transition: border-color 0.2s, color 0.2s;
+        }
+        .ct-reset-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+        .ct-feedback {
+          font-size: 0.9rem;
+          text-align: center;
+          padding: 0.6rem 1rem;
+          border-radius: 8px;
+          box-sizing: border-box;
+          width: 100%;
+          margin: 0;
+        }
+        .ct-success {
+          background: rgba(74,222,128,0.1);
+          color: #4ade80;
+          border: 1px solid rgba(74,222,128,0.25);
+        }
+        .ct-error {
+          background: rgba(248,113,113,0.1);
+          color: #f87171;
+          border: 1px solid rgba(248,113,113,0.25);
+        }
+        @media (max-width: 700px) {
+          #contact-comp {
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem 1.2rem 4rem;
+            width: 100%;
+          }
+          .ct-left, .ct-right { width: 100%; flex: none; }
+          .ct-sub { max-width: 100%; }
+          .ct-input, .ct-btn { width: 100%; font-size: 1rem; padding: 0.85rem 1rem; }
+          .ct-textarea { min-height: 140px; }
+        }
+      `}</style>
+    </>
+  );
+};
+
+export default Contact;

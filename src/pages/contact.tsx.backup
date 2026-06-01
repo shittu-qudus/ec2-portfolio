@@ -1,0 +1,172 @@
+import { useState } from "react";
+import Sidebar from "./sidebar";
+
+type Status = "idle" | "sending" | "success" | "error";
+
+const LAMBDA_API_URL = "https://xxxxxxxx.execute-api.us-east-1.amazonaws.com/prod/contact";
+
+const Contact = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("sending");
+    setErrorMessage("");
+
+    try {
+      const res = await fetch(LAMBDA_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setStatus("success");
+        setName("");
+        setEmail("");
+        setMessage("");
+      } else {
+        throw new Error(data.error || "Something went wrong");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setStatus("error");
+      setErrorMessage(err.message || "Failed to send message. Please try again.");
+    }
+  };
+
+  return (
+    <>
+      <div className="sidebar-comp">
+        <Sidebar />
+      </div>
+
+      <main id="contact-comp">
+        <div className="ct-left">
+          <span className="ct-badge">Get in touch</span>
+          <h1 className="ct-heading">
+            Let&apos;s Build Something<br />
+            <span className="ct-heading-accent">Amazing</span>
+          </h1>
+          <p className="ct-sub">
+            Got an idea, a collaboration request, or just want to say hello?
+            Drop a message — I respond faster than you think.
+          </p>
+
+          <div className="ct-how">
+            <p className="ct-direct-label">Powered by AWS Lambda</p>
+            <div className="ct-steps">
+              <div className="ct-step">
+                <span className="ct-step-num">1</span>
+                <span className="ct-step-text">You fill the form</span>
+              </div>
+              <div className="ct-step-arrow">→</div>
+              <div className="ct-step">
+                <span className="ct-step-num">2</span>
+                <span className="ct-step-text">Lambda runs</span>
+              </div>
+              <div className="ct-step-arrow">→</div>
+              <div className="ct-step">
+                <span className="ct-step-num">3</span>
+                <span className="ct-step-text">Email sent via SES</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ct-direct">
+            <p className="ct-direct-label">Prefer direct contact?</p>
+            <a href="mailto:shittuqadekunle@gmail.com" className="ct-email">
+              shittuqadekunle@gmail.com
+            </a>
+          </div>
+        </div>
+
+        <div className="ct-right">
+          <form className="ct-form" onSubmit={handleSubmit}>
+            <div className="ct-field">
+              <label className="ct-label" htmlFor="name">Your Name</label>
+              <input
+                id="name"
+                type="text"
+                required
+                placeholder="John Doe"
+                className="ct-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={status === "sending" || status === "success"}
+              />
+            </div>
+
+            <div className="ct-field">
+              <label className="ct-label" htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                required
+                placeholder="john@example.com"
+                className="ct-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === "sending" || status === "success"}
+              />
+            </div>
+
+            <div className="ct-field">
+              <label className="ct-label" htmlFor="message">Your Message</label>
+              <textarea
+                id="message"
+                required
+                rows={5}
+                placeholder="Tell me about your project or idea..."
+                className="ct-input ct-textarea"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                disabled={status === "sending" || status === "success"}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={status === "sending" || status === "success"}
+              className="ct-btn"
+            >
+              {status === "sending"
+                ? "Sending..."
+                : status === "success"
+                ? "Message Sent ✓"
+                : "Send Message →"}
+            </button>
+
+            {status === "success" && (
+              <p className="ct-feedback ct-success">
+                🚀 Thanks! Your message is on its way. I&apos;ll get back to you soon.
+              </p>
+            )}
+            {status === "error" && (
+              <p className="ct-feedback ct-error">
+                ⚠️ {errorMessage || "Something went wrong. Please try again."}
+              </p>
+            )}
+            {status === "success" && (
+              <button
+                type="button"
+                className="ct-reset-btn"
+                onClick={() => setStatus("idle")}
+              >
+                Send another message
+              </button>
+            )}
+          </form>
+        </div>
+      </main>
+    </>
+  );
+};
+
+export default Contact;
