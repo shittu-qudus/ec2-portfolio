@@ -30,7 +30,8 @@ jobs:
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }
+          port: 22}
           script: |
             cd ~/myPortofolio
             git pull origin main
