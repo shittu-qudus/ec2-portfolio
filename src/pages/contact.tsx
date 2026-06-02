@@ -14,22 +14,18 @@ const Contact = () => {
     e.preventDefault();
     setStatus("sending");
     setErrorMessage("");
-    
-    console.log("Sending to Lambda:", { name, email, message });
-    
+
     try {
       const response = await fetch("https://68b10v18bl.execute-api.us-east-1.amazonaws.com/prod/contact", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, message }),
       });
-      
-      console.log("Response status:", response.status);
+
       const data = await response.json();
-      console.log("Response data:", data);
-      
+
       if (response.ok) {
         setStatus("success");
         setName("");
@@ -39,7 +35,6 @@ const Contact = () => {
         throw new Error(data.error || data.details || `Server error: ${response.status}`);
       }
     } catch (err: any) {
-      console.error("Submission error:", err);
       setStatus("error");
       setErrorMessage(err.message || "Failed to send message. Please try again.");
     }
