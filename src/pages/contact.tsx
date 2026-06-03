@@ -58,26 +58,6 @@ const Contact = () => {
             Drop a message — I respond faster than you think.
           </p>
 
-          <div className="ct-how">
-            <p className="ct-direct-label">Powered by AWS Lambda</p>
-            <div className="ct-steps">
-              <div className="ct-step">
-                <span className="ct-step-num">1</span>
-                <span className="ct-step-text">You fill the form</span>
-              </div>
-              <div className="ct-step-arrow">→</div>
-              <div className="ct-step">
-                <span className="ct-step-num">2</span>
-                <span className="ct-step-text">Lambda runs</span>
-              </div>
-              <div className="ct-step-arrow">→</div>
-              <div className="ct-step">
-                <span className="ct-step-num">3</span>
-                <span className="ct-step-text">Email sent via SES</span>
-              </div>
-            </div>
-          </div>
-
           <div className="ct-direct">
             <p className="ct-direct-label">Prefer direct contact?</p>
             <a href="mailto:shittuqadekunle@gmail.com" className="ct-email">
@@ -207,40 +187,6 @@ const Contact = () => {
           color: rgba(255,255,255,0.55);
           max-width: 340px;
         }
-        .ct-how {
-          margin-top: 0.5rem;
-          padding: 1rem;
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
-          background: rgba(255,255,255,0.03);
-        }
-        .ct-steps {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-top: 0.75rem;
-          flex-wrap: wrap;
-        }
-        .ct-step {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-        }
-        .ct-step-num {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.15);
-          color: #fff;
-          font-size: 0.7rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        .ct-step-text { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
-        .ct-step-arrow { font-size: 0.75rem; color: rgba(255,255,255,0.25); }
         .ct-direct {
           margin-top: 1rem;
           padding-top: 1.5rem;
